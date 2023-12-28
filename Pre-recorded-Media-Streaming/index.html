@@ -1,292 +1,367 @@
-﻿<!--
-> Muaz Khan     - https://github.com/muaz-khan 
-> MIT License   - https://www.webrtc-experiment.com/licence/
-> Experiments   - https://github.com/muaz-khan/WebRTC-Experiment/tree/master/Pre-recorded-Media-Streaming
--->
+
+<!-- Demo version: 2017.08.06 -->
+
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>Pre-recorded media streaming ® Muaz Khan</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-        <link rel="author" type="text/html" href="https://plus.google.com/100325991024054712503">
-        <meta name="author" content="Muaz Khan">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" type="text/css" />
-        <link rel="stylesheet" href="https://www.webrtc-experiment.com/style.css">
-        
-        <style>
-            p { padding: .8em; }
 
-            video {
-                vertical-align: top;
-                width: 30%;
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+
+    <link rel="stylesheet" href="https://www.webrtc-experiment.com/style.css">
+
+    <title>Pre-recorded media streaming using RTCMultiConnection</title>
+
+    <meta name="description" content="Pre-recorded media streaming using RTCMultiConnection" />
+    <meta name="keywords" content="Pre-recorded media streaming,WebRTC,RTCMultiConnection" />
+
+    <style>
+        * {
+            word-wrap:break-word;
+        }
+        video {
+            object-fit: fill;
+            width: 100%;
+        }
+        button,
+        input,
+        select {
+            font-weight: normal;
+            padding: 2px 4px;
+            text-decoration: none;
+            display: inline-block;
+            text-shadow: none;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .make-center {
+            text-align: center;
+            padding: 5px 10px;
+        }
+
+        img, input, textarea {
+          max-width: 100%
+        }
+
+        @media all and (max-width: 500px) {
+            .fork-left, .fork-right, .github-stargazers {
+                display: none;
             }
+        }
+    </style>
+</head>
 
-            input {
-                border: 1px solid #d9d9d9;
-                border-radius: 1px;
-                font-size: 2em;
-                margin: .2em;
-            }
+<body>
+    <article>
 
-            li {
-                border-bottom: 1px solid rgb(189, 189, 189);
-                border-left: 1px solid rgb(189, 189, 189);
-                padding: .5em;
-            }
-
-            code {
-                color: red;
-                font-family: inherit;
-            }
-        </style>
-        <script>
-            document.createElement('article');
-            document.createElement('footer');
-        </script>
-		
-        <script src="https://www.webrtc-experiment.com/firebase.js"> </script>
-        <script src="https://www.webrtc-experiment.com/streamer.js"> </script>
-    </head>
-
-    <body>
-        <article>
-            <header style="text-align: center;">
-                <h1>
-                    <a href="https://github.com/muaz-khan/WebRTC-Experiment/tree/master/Pre-recorded-Media-Streaming" target="_blank">Pre-recorded media streaming</a> ® 
-                    <a href="https://github.com/muaz-khan" target="_blank">Muaz Khan</a>
-                </h1>            
-                <p>
-                    <span>© 2013</span>
-                    <a href="https://github.com/muaz-khan" target="_blank">Muaz Khan</a><span>&lt;</span><a href="http://twitter.com/muazkh" target="_blank">@muazkh</a><span>&gt;</span>
-                    »
-                    <a href="http://twitter.com/WebRTCWeb" target="_blank" title="Twitter profile for WebRTC Experiments">@WebRTC Experiments</a>
-                    »
-                    <a href="https://plus.google.com/106306286430656356034/posts" target="_blank" title="Google+ page for WebRTC Experiments">Google+</a>
-                    »
-                    <a href="https://github.com/muaz-khan/WebRTC-Experiment/issues" target="_blank">What's New?</a>
-                </p>
-            </header>
-
-            <div class="github-stargazers"></div>
-
-            <section class="plusone-gplus">
-                <div class="g-plusone" data-href="https://www.webrtc-experiment.com/"></div>
-            </section>
-			
-            <section class="experiment" style="text-align: center;">
-                <video autoplay poster="https://twimg0-a.akamaihd.net/profile_background_images/378800000012473113/c07de6ffc6c083f6b83aa734de5c6601.png"></video>
-                <div>
-                    <a href="https://googledrive.com/host/0B6GWd_dUUTT8RzVSRVU2MlIxcm8/Pre-recorded-Media-Streaming/WebM-file-to-stream-as-pre-recorded-media.webm" title="Download WebM file to stream as pre-recorded media" download="WebM-file-to-stream-as-pre-recorded-media.webm" target="_blank">Download WebM video</a>
-                    <input type="file" title="Select WebM file / Size must be less than 800KB">
-                </div>
-            </section>
-			
-            <script>
-                var streamer = new Streamer();
-            </script>
-
-            <script>
-                /* pre-recorded media sender */
-                streamer.push = function(chunk) {
-                    firebase.push(chunk);
-                };
-
-                document.querySelector('input[type=file]').onchange = function() {
-                    streamer.stream(this.files[0]);
-                };
-            </script>
-
-            <script>
-                /* pre-recorded media receiver */
-
-                streamer.video = document.querySelector('video');
-                streamer.receive();
-
-                function onData(data) {
-                    if (data.end) streamer.end();
-                    else streamer.append(data);
-                }
-            </script>
-
-            <script>
-                /* socket.io to push chunks */
-                var channel = location.hash.substr(1) || '000-pre-recorded-media-streaming';
-                var firebase = new Firebase('https://chat.firebaseIO.com/' + channel);
-                firebase.on('child_added', function(data) {
-                    var data = data.val();
-                    console.log(data);
-
-                    onData(data);
-                });
-                firebase.onDisconnect().remove();
-            </script>
-			
-            <section class="experiment">
-                <h2 class="header">How to stream your own video?</h2>
-                <pre>
-&lt;script src="https://www.webrtc-experiment.com/streamer.js"&gt; &lt;/script&gt;
-&lt;script&gt; var streamer = new Streamer(); &lt;/script&gt;
-</pre>
-            </section>
-            <section class="experiment">
-                <h2 class="header">pre-recorded media sender instance</h2>
-                <pre>
-&lt;script&gt;
-    streamer.push = function (chunk) {
-        socket.send(chunk);
-    };
-
-    document.querySelector('input[type=file]').onchange = function () {
-        streamer.stream(this.files[0]);
-    };
-&lt;/script&gt;
-</pre>
-            </section>
-            <section class="experiment">
-                <h2 class="header">pre-recorded media receiver instance</h2>
-                <pre>
-&lt;script&gt;
-    streamer.video = document.querySelector('video');
-    streamer.receive();
-
-    function onData(data) {
-        if (data.end) streamer.end();
-        else streamer.append(data);
-    }
-&lt;/script&gt;
-</pre>
-            </section>
-            <section class="experiment">
-                <h2 class="header">socket.io/websocket to push chunks</h2>
-                <pre>
-&lt;script&gt;
-    socket.onmessage = onData;
-
-    // or
-    socket.on('message', onData);
-&lt;/script&gt;
-</pre>
-            </section>
-            <section class="experiment">
-                <h2 class="header" style="line-height: 2;">Chrome &gt;=M28 (or Firefox with flag "media.mediasource.enabled=true") is mandatory to test this experiment.</h2>
-
-                <ol>
-                    <li>Streaming pre-recorded video (media file)</li>
-                    <li>Currently, using Firebase for streaming chunks of data because <strong>MediaSource</strong> APIs are only supported on chrome canary which has unreliable RTP (RTCDataChannel) streams. Note: SCTP data channels landed on chrome M >=30 under a flag.</li>
-                    <li>Streaming WebM files only (in the moment!)</li>
-                    <li>WebM file's size must be less than 1000KB; otherwise it will fail. It is a bug will be fixed soon.</li>
-                </ol>
-			
-            </section>
-            <section class="experiment">
-                <h2 class="header">It is an early release!</h2>
-
-                <ol>
-                    <li>This experiment is an early release. In future, RTCDataChannel APIs will be used to stream pre-recorded media in realtime! (until "<strong>video.captureStream</strong>" gets implemented. Note: Firefox implemented a prefixed version of captureStream API i.e. <code><strong>mozCaptureStreamUntilEnded</strong></code>)</li>
-                    <li>MediaSource APIs are not made for streaming pre-recorded Medias, though!</li>
-                    <li>Waiting for "<strong>video.captureStream</strong>" implementation that is proposed for pre-recorded media streaming, unfortunately still in draft!</li>
-                </ol>
-			
-            </section>
-            <section class="experiment">
-
-                <h2 class="header">In
-                    <a href="http://www.w3.org/TR/streamproc/" target="_blank" title="Unfortunately, we've to wait!">future</a>:</h2>	
-                <pre>
-partial interface HTMLMediaElement {
-    readonly attribute MediaStream stream;
-
-    MediaStream <strong title="This will return us MediaStream object that we can directly attach to peer connection.">captureStream</strong>();
-    MediaStream captureStreamUntilEnded();
-    readonly attribute boolean audioCaptured;
-
-    attribute any src;
-};
-</pre>
-
-                <p>
-                    We <strong>will be able to</strong> get stream from video like this:
-                </p>
-				
-                <pre>
-video.src = 'your pre-recorded webm/etc. video';
-var preRecordedStream = video.<strong title="This will return us MediaStream object that we can directly attach to peer connection.">captureStream</strong>();
-peer.addStream ( preRecordedStream );
-</pre>
-
-            </section>
-            <section class="experiment">
-                <h2 class="header">Other possibilities</h2>
-                <pre>
-var videoStream = video.createMediaElementSource();
-var audioStream = audio.createMediaElementSource();
-</pre>
-                <p>
-                    "createMediaElementSource" is also landed on chrome M >= 30. It is also useful for streaming pre-recorded medias.
-                </p>
-
-            </section>
-            <section class="experiment">
-                <h2 class="header">How this experiment works?</h2>
-
-                <ol>
-                    <li>Getting access to WebM video file using File API</li>
-                    <li>Reading it as <strong>array buffer</strong> using File Reader API</li>
-                    <li>Splitting buffers in predefined small chunks; and posting/transmitting those chunks in a loop using Firebase.</li>
-                    <li>As soon as other party receives first chunk; MediaSource API will start playing video without waiting for all chunks to be downloaded!</li>
-                    <li>You can save/store/record those chunks in any database; because it is a typed array [<strong>Uint8Array</strong>].</li>
-                </ol>
-			
-            </section>
-            <section class="experiment">
-                <h2 class="header">Let's say you want to:</h2>
-                <ol>
-                    <li>Stream 5min to 7min of video data i.e. total two minutes of video data (over all sockets) from <strong>first</strong> WebM file.</li>
-                    <li>Then, quickly you want to stream 17 to 19 minutes i.e. total two minutes of data from <strong>second</strong> WebM file.</li>
-                    <li>Then you want to stream 11 to 15 minutes i.e. total 4 minutes of data from <strong>third</strong> WebM file.</li>
-                </ol>
-                <p>You can do all such things today!</p>
-                <p>In simple words; you can stream <strong>part of video</strong> from <strong>first</strong> WebM file; part of video from <strong>second</strong> WebM file and so on, in realtime!</p>
-            </section>
-            
-            <section class="experiment">
-                <h2 class="header">Suggestions</h2>
-                <ol>
-                    <li>
-                        If you're newcomer, newbie or beginner; you're suggested to try <a href="https://github.com/muaz-khan/WebRTC-Experiment/tree/master/RTCMultiConnection" target="_blank">RTCMultiConnection.js</a> or <a href="https://github.com/muaz-khan/WebRTC-Experiment/tree/master/DataChannel" target="_blank">DataChannel.js</a> libraries.
-                    </li>
-                </ol>
-            </section>
-        
-            <section class="experiment own-widgets latest-commits">
-                <h2 class="header" id="updates" style="color: red; padding-bottom: .1em;"><a href="https://github.com/muaz-khan/WebRTC-Experiment/commits/master" target="_blank">Latest Updates</a></h2>
-                <div id="github-commits"></div>
-            </section>
-        
-            <section class="experiment">
-                <h2 class="header" id="feedback">Feedback</h2>
-                <div>
-                    <textarea id="message" style="border: 1px solid rgb(189, 189, 189); height: 8em; margin: .2em; outline: none; resize: vertical; width: 98%;" placeholder="Have any message? Suggestions or something went wrong?"></textarea>
-                </div>
-                <button id="send-message" style="font-size: 1em;">Send Message</button><small style="margin-left: 1em;">Enter your email too; if you want "direct" reply!</small>
-            </section>
-            
-        </article>
-        <footer>
+        <header style="text-align: center;">
+            <h1>Pre-recorded media streaming using RTCMultiConnection</h1>
             <p>
-                <a href="https://www.webrtc-experiment.com/">WebRTC Experiments</a>
-                ©
-                <a href="https://plus.google.com/100325991024054712503" rel="author" target="_blank">Muaz Khan</a>, <span>2013 </span>»
-                <a href="mailto:muazkh@gmail.com" target="_blank">Email</a>»
-                <a href="http://twitter.com/muazkh" target="_blank">@muazkh</a>»
-                <a href="https://github.com/muaz-khan" target="_blank">Github</a>
+                <a href="https://rtcmulticonnection.herokuapp.com/">HOME</a>
+                <span> &copy; </span>
+                <a href="http://www.MuazKhan.com/" target="_blank">Muaz Khan</a> .
+                <a href="http://twitter.com/WebRTCWeb" target="_blank" title="Twitter profile for WebRTC Experiments">@WebRTCWeb</a> .
+                <a href="https://github.com/muaz-khan?tab=repositories" target="_blank" title="Github Profile">Github</a> .
+                <a href="https://github.com/muaz-khan/RTCMultiConnection/issues?state=open" target="_blank">Latest issues</a> .
+                <a href="https://github.com/muaz-khan/RTCMultiConnection/commits/master" target="_blank">What's New?</a>
             </p>
-        </footer>
-    
-        <!-- commits.js is useless for you! -->
-        <script src="https://www.webrtc-experiment.com/commits.js" async> </script>
-    </body>
+        </header>
+
+        <div class="github-stargazers"></div>
+
+        <blockquote>
+            You can stream your WebM or Mp3 files using WebRTC media ports. It is a realtime streaming!
+
+            <br><br>
+            Old pre-recorded media streaming demo is <a href="https://github.com/muaz-khan/WebRTC-Experiment/tree/master/Pre-recorded-Media-Streaming">available here</a>.
+
+            <br><br>
+            The person who opens room, will select a WebM file. This demo will read your WebM file and generate a MediaStream object. The resulting MediaStream object will be shared with other users in realtime using WebRTC RTCPeerConnection API.
+        </blockquote>
+
+        <section class="experiment">
+            <div class="make-center">
+                <input type="text" id="room-id" value="abcdef" autocorrect=off autocapitalize=off size=20>
+                <button id="open-room">Open Room</button>
+                <button id="join-room">Join Room</button>
+
+                <div id="room-urls" style="text-align: center;display: none;background: #F1EDED;margin: 15px -10px;border: 1px solid rgb(189, 189, 189);border-left: 0;border-right: 0;"></div>
+            </div>
+
+            <div id="videos-container"></div>
+        </section>
+
+        <script src="https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"></script>
+        <script src="https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"></script>
+
+        <script src="https://www.webrtc-experiment.com:443/FileBufferReader.js"></script>
+
+        <!-- custom layout for HTML5 audio/video elements -->
+        <script src="https://www.webrtc-experiment.com/getMediaElement.js"></script>
+
+        <script>
+            var connection = new RTCMultiConnection(); // to get window.DetectRTC object
+            
+            // ......................................................
+            // .......................UI Code........................
+            // ......................................................
+
+            function oldBrowserDetected() {
+                document.getElementById('open-room').disabled = true;
+                document.getElementById('join-room').disabled = true;
+
+                if(DetectRTC.browser.name == 'Chrome' && DetectRTC.browser.version >= 53) {
+                    document.querySelector('blockquote').innerHTML = 'Please enable this flag: <a href="chrome://flags/#enable-experimental-web-platform-features">chrome://flags/#enable-experimental-web-platform-features</a>';
+                } else {
+                    document.querySelector('blockquote').innerHTML = 'Your browser does NOT supports pre-recorded media streaming.<br><br><span style="color:red;">This demo requires Chrome 53+ or Firefox (only on Mac).';
+                }
+            }
+
+            if(DetectRTC.isVideoSupportsStreamCapturing !== true) {
+                oldBrowserDetected();
+            }
+
+            document.getElementById('open-room').onclick = function() {
+                disableInputButtons();
+
+                var selector = new FileSelector();
+                selector.accept = '*.webm'; // webm or mp4 or mp3 or wav or ogg
+                selector.selectSingleFile(function(file) {
+                    if(file.name.search(/.webm|.mp3/g) === -1) {
+                        document.getElementById('open-room').disabled = false;
+                        document.getElementById('join-room').disabled = false;
+                        document.getElementById('room-id').disabled = false;
+
+                        alert('Please select either WebM or Mp3 file.');
+                        return;
+                    }
+
+                    var video = document.createElement('video');
+                    video.loop = true;
+                    video.src = URL.createObjectURL(file);
+                    video.play();
+
+                    setTimeout(function() {
+                        video.play();
+
+                        try {
+                            if('captureStream' in video) {
+                                connection.preRecorededStream = video.captureStream();
+                            }
+                            else if('mozCaptureStream' in video) {
+                                connection.preRecorededStream = video.mozCaptureStream();
+                            }
+                            else if('webkitCaptureStream' in video) {
+                                connection.preRecorededStream = video.webkitCaptureStream();
+                            }
+                        }
+                        catch(e) {
+                            connection.preRecorededStream = null;
+                        }
+
+                        if(!connection.preRecorededStream) {
+                            oldBrowserDetected();
+                            return;
+                        }
+
+                        var stream = new MediaStream();
+                        connection.preRecorededStream.getTracks().forEach(function(track) {
+                            stream.addTrack(track);
+                        });
+
+                        // attach pre-recorded steam
+                        connection.attachStreams.push(stream);
+                        connection.onstream({
+                            userid: connection.userid,
+                            extra: connection.extra,
+                            type: 'local',
+                            stream: stream,
+                            mediaElement: video
+                        });
+
+                        connection.open(document.getElementById('room-id').value, function() {
+                            showRoomURL(connection.sessionid);
+                        });
+                    }, 2000);
+                });
+            };
+
+            document.getElementById('join-room').onclick = function() {
+                disableInputButtons();
+                connection.join(document.getElementById('room-id').value);
+            };
+
+            // ......................................................
+            // ..................RTCMultiConnection Code.............
+            // ......................................................
+
+            connection.dontCaptureUserMedia = true;
+
+            // by default, socket.io server is assumed to be deployed on your own URL
+            // connection.socketURL = '/';
+
+            // comment-out below line if you do not have your own socket.io server
+            connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+
+            connection.socketMessageEvent = 'pre-recorded-media-streaming-demo';
+
+            connection.session = {
+                audio: true,
+                video: true,
+                oneway: true
+            };
+
+            connection.sdpConstraints.mandatory = {
+                OfferToReceiveAudio: true,
+                OfferToReceiveVideo: true
+            };
+
+            connection.videosContainer = document.getElementById('videos-container');
+            connection.onstream = function(event) {
+                var width = parseInt(connection.videosContainer.clientWidth) - 20;
+                var mediaElement = getMediaElement(event.mediaElement, {
+                    title: event.userid,
+                    buttons: ['full-screen'],
+                    width: width,
+                    showOnMouseEnter: false
+                });
+
+                connection.videosContainer.appendChild(mediaElement);
+
+                setTimeout(function() {
+                    mediaElement.media.play();
+                    mediaElement.media.controls = true;
+                }, 5000);
+
+                mediaElement.id = event.streamid;
+            };
+
+            connection.onstreamended = function(event) {
+                var mediaElement = document.getElementById(event.streamid);
+                if(mediaElement) {
+                    mediaElement.parentNode.removeChild(mediaElement);
+                }
+            };
+
+            function disableInputButtons() {
+                document.getElementById('open-room').disabled = true;
+                document.getElementById('join-room').disabled = true;
+                document.getElementById('room-id').disabled = true;
+            }
+
+            // ......................................................
+            // ......................Handling Room-ID................
+            // ......................................................
+
+            function showRoomURL(roomid) {
+                var roomHashURL = '#' + roomid;
+                var roomQueryStringURL = '?roomid=' + roomid;
+
+                var html = '<h2>Unique URL for your room:</h2><br>';
+
+                html += 'Hash URL: <a href="' + roomHashURL + '" target="_blank">' + roomHashURL + '</a>';
+                html += '<br>';
+                html += 'QueryString URL: <a href="' + roomQueryStringURL + '" target="_blank">' + roomQueryStringURL + '</a>';
+
+                var roomURLsDiv = document.getElementById('room-urls');
+                roomURLsDiv.innerHTML = html;
+
+                roomURLsDiv.style.display = 'block';
+            }
+
+            (function() {
+                var params = {},
+                    r = /([^&=]+)=?([^&]*)/g;
+
+                function d(s) {
+                    return decodeURIComponent(s.replace(/\+/g, ' '));
+                }
+                var match, search = window.location.search;
+                while (match = r.exec(search.substring(1)))
+                    params[d(match[1])] = d(match[2]);
+                window.params = params;
+            })();
+
+            var roomid = '';
+            if (localStorage.getItem(connection.socketMessageEvent)) {
+                roomid = localStorage.getItem(connection.socketMessageEvent);
+            } else {
+                roomid = connection.token();
+            }
+            document.getElementById('room-id').value = roomid;
+            document.getElementById('room-id').onkeyup = function() {
+                localStorage.setItem(connection.socketMessageEvent, this.value);
+            };
+
+            var hashString = location.hash.replace('#', '');
+            if(hashString.length && hashString.indexOf('comment-') == 0) {
+              hashString = '';
+            }
+
+            var roomid = params.roomid;
+            if(!roomid && hashString.length) {
+                roomid = hashString;
+            }
+
+            if(roomid && roomid.length) {
+                document.getElementById('room-id').value = roomid;
+                localStorage.setItem(connection.socketMessageEvent, roomid);
+
+                // auto-join-room
+                (function reCheckRoomPresence() {
+                    connection.checkPresence(roomid, function(isRoomExists) {
+                        if(isRoomExists) {
+                            connection.join(roomid);
+                            return;
+                        }
+
+                        setTimeout(reCheckRoomPresence, 5000);
+                    });
+                })();
+
+                disableInputButtons();
+            }
+        </script>
+
+        <section class="experiment" id="demos"><details><summary style="text-align:center;">Check 51 other RTCMultiConnection-v3 demos</summary><h2 style="text-align:center;display:block;"><a href="https://www.npmjs.com/package/rtcmulticonnection-v3"><img src="https://img.shields.io/npm/v/rtcmulticonnection-v3.svg"></a><a href="https://www.npmjs.com/package/rtcmulticonnection-v3"><img src="https://img.shields.io/npm/dm/rtcmulticonnection-v3.svg"></a><a href="https://travis-ci.org/muaz-khan/RTCMultiConnection"><img src="https://travis-ci.org/muaz-khan/RTCMultiConnection.png?branch=master"></a></h2><ol><li><a href="/demos/Audio+ScreenSharing.html">Audio+ScreenSharing.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Audio+ScreenSharing.html">Source</a>)</li><li><a href="/demos/Audio+Video+TextChat+FileSharing.html">Audio+Video+TextChat+FileSharing.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Audio+Video+TextChat+FileSharing.html">Source</a>)</li><li><a href="/demos/Audio-Conferencing.html">Audio-Conferencing.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Audio-Conferencing.html">Source</a>)</li><li><a href="/demos/Audio-Video-Screen.html">Audio-Video-Screen.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Audio-Video-Screen.html">Source</a>)</li><li><a href="/demos/Cross-Domain-Screen-Capturing.html">Cross-Domain-Screen-Capturing.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Cross-Domain-Screen-Capturing.html">Source</a>)</li><li><a href="/demos/Disconnect+Rejoin.html">Disconnect+Rejoin.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Disconnect+Rejoin.html">Source</a>)</li><li><a href="/demos/Files-Scalable-Broadcast.html">Files-Scalable-Broadcast.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Files-Scalable-Broadcast.html">Source</a>)</li><li><a href="/demos/Firebase-Demo.html">Firebase-Demo.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Firebase-Demo.html">Source</a>)</li><li><a href="/demos/MCU.html">MCU.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/MCU.html">Source</a>)</li><li><a href="/demos/Multi-Broadcasters-and-Many-Viewers.html">Multi-Broadcasters-and-Many-Viewers.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Multi-Broadcasters-and-Many-Viewers.html">Source</a>)</li><li><a href="/demos/One-to-One.html">One-to-One.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/One-to-One.html">Source</a>)</li><li><a href="/demos/Password-Protected-Rooms.html">Password-Protected-Rooms.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Password-Protected-Rooms.html">Source</a>)</li><li><a href="/demos/Pre-recorded-Media-Streaming.html">Pre-recorded-Media-Streaming.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Pre-recorded-Media-Streaming.html">Source</a>)</li><li><a href="/demos/PubNub-Demo.html">PubNub-Demo.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/PubNub-Demo.html">Source</a>)</li><li><a href="/demos/SFU.html">SFU.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/SFU.html">Source</a>)</li><li><a href="/demos/SSEConnection.html">SSEConnection.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/SSEConnection.html">Source</a>)</li><li><a href="/demos/Scalable-Broadcast.html">Scalable-Broadcast.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Scalable-Broadcast.html">Source</a>)</li><li><a href="/demos/Scalable-Screen-Broadcast.html">Scalable-Screen-Broadcast.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Scalable-Screen-Broadcast.html">Source</a>)</li><li><a href="/demos/Scalable-Screen-plus-Audio-Broadcast.html">Scalable-Screen-plus-Audio-Broadcast.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Scalable-Screen-plus-Audio-Broadcast.html">Source</a>)</li><li><a href="/demos/Scalable-Video-Conferencing.html">Scalable-Video-Conferencing.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Scalable-Video-Conferencing.html">Source</a>)</li><li><a href="/demos/StreamHasData.html">StreamHasData.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/StreamHasData.html">Source</a>)</li><li><a href="/demos/TextChat+FileSharing.html">TextChat+FileSharing.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/TextChat+FileSharing.html">Source</a>)</li><li><a href="/demos/Translate-TextChat.html">Translate-TextChat.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Translate-TextChat.html">Source</a>)</li><li><a href="/demos/Video-Conferencing.html">Video-Conferencing.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Video-Conferencing.html">Source</a>)</li><li><a href="/demos/Video-Scalable-Broadcast.html">Video-Scalable-Broadcast.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Video-Scalable-Broadcast.html">Source</a>)</li><li><a href="/demos/Videos-Layout.html">Videos-Layout.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Videos-Layout.html">Source</a>)</li><li><a href="/demos/WebSocket-Demo.html">WebSocket-Demo.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/WebSocket-Demo.html">Source</a>)</li><li><a href="/demos/addStream-in-Chat-room.html">addStream-in-Chat-room.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/addStream-in-Chat-room.html">Source</a>)</li><li><a href="/demos/admin-guest.html">admin-guest.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/admin-guest.html">Source</a>)</li><li><a href="/demos/applyConstraints.html">applyConstraints.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/applyConstraints.html">Source</a>)</li><li><a href="/demos/autoCreateMediaElement.html">autoCreateMediaElement.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/autoCreateMediaElement.html">Source</a>)</li><li><a href="/demos/change-resolutions.html">change-resolutions.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/change-resolutions.html">Source</a>)</li><li><a href="/demos/checkPresence.html">checkPresence.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/checkPresence.html">Source</a>)</li><li><a href="/demos/custom-socket-event.html">custom-socket-event.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/custom-socket-event.html">Source</a>)</li><li><a href="/demos/file-sharing.html">file-sharing.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/file-sharing.html">Source</a>)</li><li><a href="/demos/getPublicModerators.html">getPublicModerators.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/getPublicModerators.html">Source</a>)</li><li><a href="/demos/getStats.html">getStats.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/getStats.html">Source</a>)</li><li><a href="/demos/keep-rejoining.html">keep-rejoining.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/keep-rejoining.html">Source</a>)</li><li><a href="/demos/replaceTrack.html">replaceTrack.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/replaceTrack.html">Source</a>)</li><li><a href="/demos/screen-sharing.html">screen-sharing.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/screen-sharing.html">Source</a>)</li><li><a href="/demos/share-part-of-screen.html">share-part-of-screen.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/share-part-of-screen.html">Source</a>)</li><li><a href="/demos/switch-cameras.html">switch-cameras.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/switch-cameras.html">Source</a>)</li><li><a href="/demos/v2-conference.html">v2-conference.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/v2-conference.html">Source</a>)</li><li><a href="/demos/video-broadcasting.html">video-broadcasting.html</a> (<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/video-broadcasting.html">Source</a>)</li><ol></details></section><section class="experiment" id="docs"><details><summary style="text-align:center;">RTCMultiConnection Docs</summary><h2 style="text-align:center;display:block;"><a href="http://www.rtcmulticonnection.org/docs/">http://www.rtcmulticonnection.org/docs/</a></h2><ol><li><a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/README.md">README.md</a></li><li><a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/api.md">api.md</a></li><li><a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/getting-started.md">getting-started.md</a></li><li><a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/how-to-use.md">how-to-use.md</a></li><li><a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/installation-guide.md">installation-guide.md</a></li><li><a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/ios-android.md">ios-android.md</a></li><li><a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/tips-tricks.md">tips-tricks.md</a></li><li><a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/upgrade.md">upgrade.md</a></li></ol></details></section><section class="experiment own-widgets latest-commits">
+            <h2 class="header" id="updates" style="color: red;padding-bottom: .1em;"><a href="https://github.com/muaz-khan/RTCMultiConnection/commits/master">Latest Updates</a></h2>
+            <div id="github-commits"></div>
+        </section>
+
+        <section class="experiment own-widgets">
+            <h2 class="header" id="updates" style="color: red;padding-bottom: .1em;"><a href="https://github.com/muaz-khan/RTCMultiConnection/issues">Latest Issues</a></h2>
+            <div id="github-issues"></div>
+        </section>
+
+        <section class="experiment">
+            <h2 class="header" id="feedback">Feedback</h2>
+            <div>
+                <textarea id="message" style="height: 8em; margin: .2em; width: 98%; border: 1px solid rgb(189, 189, 189); outline: none; resize: vertical;" placeholder="Have any message? Suggestions or something went wrong?"></textarea>
+            </div>
+            <button id="send-message" style="font-size: 1em;">Send Message</button><small style="margin-left:1em;">Enter your email too; if you want "direct" reply!</small>
+        </section>
+
+        <a href="https://github.com/muaz-khan/RTCMultiConnection" class="fork-left"></a>
+
+        <script>
+            window.useThisGithubPath = 'muaz-khan/RTCMultiConnection';
+        </script>
+        <script src="https://www.webrtc-experiment.com/commits.js" async></script>
+
+    </article>
+
+    <footer>
+        <p>
+            <a href="https://www.webrtc-experiment.com">WebRTC Experiments</a> © <a href="https://plus.google.com/+MuazKhan" rel="author" target="_blank">Muaz Khan</a>
+            <a href="mailto:muazkh@gmail.com" target="_blank">muazkh@gmail.com</a>
+            <a href="https://github.com/muaz-khan" target="_blank">Github</a>
+        </p>
+    </footer>
+
+</body>
+
 </html>

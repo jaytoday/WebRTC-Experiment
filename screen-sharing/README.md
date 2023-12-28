@@ -2,12 +2,15 @@
 
 Ad-ons free; plugin-free; extension free; direct browser-to-browser screen sharing.
 
+**Firefox?** [Install Firefox Extension](https://www.webrtc-experiment.com/store/firefox-extension/enable-screen-capturing.xpi) / [Source Code](https://github.com/muaz-khan/Firefox-Extensions/tree/master/enable-screen-capturing)
+
 =
 
 #### First Step: Link the library
 
 ```html
-<script src="https://www.webrtc-experiment.com/screen-sharing/screen.js"></script>
+<script src="//cdn.webrtc-experiment.com/getScreenId.js"></script>
+<script src="//cdn.webrtc-experiment.com/screen.js"></script>
 ```
 
 =
@@ -15,7 +18,7 @@ Ad-ons free; plugin-free; extension free; direct browser-to-browser screen shari
 #### Last Step: Start using it!
 
 ```javascript
-var screen = new Screen('screen-unique-id');
+var screen = new Screen('screen-unique-id'); // argument is optional
 
 // on getting local or remote streams
 screen.onaddstream = function(e) {
@@ -28,7 +31,7 @@ screen.onaddstream = function(e) {
 screen.check();
 
 document.getElementById('share-screen').onclick = function() {
-    screen.share('screen-name');
+    screen.share();
 };
 ```
 
@@ -145,9 +148,12 @@ This [WebRTC Screen Sharing](https://www.webrtc-experiment.com/screen-sharing/) 
 
 | Browser        | Support           |
 | ------------- |-------------|
-| Firefox | [Stable](http://www.mozilla.org/en-US/firefox/new/) / [Aurora](http://www.mozilla.org/en-US/firefox/aurora/) / [Nightly](http://nightly.mozilla.org/) |
-| Google Chrome | [Stable](https://www.google.com/intl/en_uk/chrome/browser/) / [Canary](https://www.google.com/intl/en/chrome/browser/canary.html) / [Beta](https://www.google.com/intl/en/chrome/browser/beta.html) / [Dev](https://www.google.com/intl/en/chrome/browser/index.html?extra=devchannel#eula) |
-| Android | [Chrome Beta](https://play.google.com/store/apps/details?id=com.chrome.beta&hl=en) |
+| Firefox | 52 or higher |
+| Google Chrome | 49 or higher |
+| Android | latest |
+| Edge | 17 or higher |
+
+Safari-11 (on MacOSX/iOS) can merely receive screens.
 
 =
 
@@ -199,4 +205,4 @@ Remember, recursive cascade images or blurred screen is chrome's implementation 
 
 #### License
 
-[WebRTC Screen Sharing](https://www.webrtc-experiment.com/screen-sharing/) is released under [MIT licence](https://www.webrtc-experiment.com/licence/) . Copyright (c) 2013 [Muaz Khan](https://plus.google.com/100325991024054712503).
+[WebRTC Screen Sharing](https://www.webrtc-experiment.com/screen-sharing/) is released under [MIT licence](https://www.webrtc-experiment.com/licence/) . Copyright (c) [Muaz Khan](https://plus.google.com/+MuazKhan).

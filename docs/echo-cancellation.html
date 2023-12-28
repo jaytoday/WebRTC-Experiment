@@ -6,15 +6,14 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>How to echo cancellation / noise management / in WebRTC? ® Muaz Khan</title>
+        <title>How to echo cancellation / noise management / in WebRTC? | Muaz Khan</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-        <link rel="author" type="text/html" href="https://plus.google.com/100325991024054712503">
+        <link rel="author" type="text/html" href="https://plus.google.com/+MuazKhan">
         <meta name="author" content="Muaz Khan">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" type="text/css" />
-        <link rel="stylesheet" href="https://www.webrtc-experiment.com/style.css">
+        <link rel="stylesheet" href="https://cdn.webrtc-experiment.com/style.css">
         
         <style>
             p { padding: .8em; }
@@ -24,37 +23,86 @@
                 border-left: 1px solid rgb(189, 189, 189);
                 padding: .5em;
             }
+
+            img {
+                height: 80%;
+                width: 13em;
+            }
+
+            .image-container {
+                margin: 2em 0;
+                text-align: center;
+            }
+
+            .image-parent {
+                border: 2px solid black;
+                border-radius: 5px;
+                margin: 0 2em;
+            }
+
+            .image-parent img { width: 100%; }
         </style>
         <script>
             document.createElement('article');
             document.createElement('footer');
         </script>
+    
+        <script type="text/javascript" src="https://cdn.webrtc-experiment.com/syntax/sh_main.min.js"> </script>
+        <script type="text/javascript" src="https://cdn.webrtc-experiment.com/syntax/sh_javascript.min.js"> </script>
+        <script type="text/javascript" src="https://cdn.webrtc-experiment.com/syntax/sh_html.min.js"> </script>
+        <link type="text/css" rel="stylesheet" href="https://cdn.webrtc-experiment.com/syntax/sh_style.css">
     </head>
 
-    <body>
+    <body onload="sh_highlightDocument();">
         <article>
             <header style="text-align: center;">
-                <h1>How to echo cancellation? / Noise management?</h1>  
+                <h1>How to echo cancellation? / Noise management in <a href="https://www.webrtc-experiment.com/">WebRTC</a>?</h1>  
                 <p>
-                    <span>© 2013</span>
-                    <a href="https://github.com/muaz-khan" target="_blank">Muaz Khan</a><span>&lt;</span><a href="http://twitter.com/muazkh" target="_blank">@muazkh</a><span>&gt;</span>
-                    »
-                    <a href="http://twitter.com/WebRTCWeb" target="_blank" title="Twitter profile for WebRTC Experiments">@WebRTC Experiments</a>
-                    »
-                    <a href="https://plus.google.com/106306286430656356034/posts" target="_blank" title="Google+ page for WebRTC Experiments">Google+</a>
-                    »
-                    <a href="https://github.com/muaz-khan/WebRTC-Experiment/issues" target="_blank">What's New?</a>
+                    <a href="https://www.webrtc-experiment.com/">HOME</a>
+                    <span> &copy; </span>
+                    <a href="http://www.MuazKhan.com/" target="_blank">Muaz Khan</a>
+                    
+                    .
+                    <a href="http://twitter.com/WebRTCWeb" target="_blank" title="Twitter profile for WebRTC Experiments">@WebRTCWeb</a>
+                    
+                    .
+                    <a href="https://github.com/muaz-khan?tab=repositories" target="_blank" title="Github Profile">Github</a>
+                    
+                    .
+                    <a href="https://github.com/muaz-khan/WebRTC-Experiment/issues?state=open" target="_blank">Latest issues</a>
+                    
+                    .
+                    <a href="https://github.com/muaz-khan/WebRTC-Experiment/commits/master" target="_blank">What's New?</a>
                 </p>
             </header>
 
             <div class="github-stargazers"></div>
 
-            <section class="plusone-gplus">
-                <div class="g-plusone" data-href="https://www.webrtc-experiment.com/"></div>
+            <blockquote style="background: #f3b7b7;border: 5px solid black;border-radius: 5px;">
+                This tutorial is <span style="border: 1px dotted red; background: yellow; padding: 2px 5px;">out-dated (written in 2013)</span>. Please check this tutorial instead: <a href="https://codelabs.developers.google.com/codelabs/webrtc-web/#0">https://codelabs.developers.google.com/codelabs/webrtc-web/#0</a>
+            </blockquote>
+            
+            <section class="experiment">
+                <h2 class="header">Useful Links!</h2>
+                
+                <ol>
+                    <li>
+                        <a href="http://www.slideshare.net/MuazKhan/echo-in-webrtc-why">Slides for what is the role of echo in WebRTC; and solutions!</a>
+                    </li>
+                    
+                    <li>
+                        <a href="https://www.webrtc-experiment.com/pdf/Echo-in-WebRTC-Why.pdf">Download PDF for What is Echo?</a>
+                    </li>
+                </ol>
+                
+                <div class="image-container">
+                    <div class="image-parent"><img src="https://www.webrtc-experiment.com/images/Echo-in-WebRTC-Why.gif"></div>
+                </div>
             </section>
             
             <section class="experiment">
                 <h2 class="header">Echo Scenarios:</h2>
+                
                 <ol>
                     <li><strong>44.1 kHz</strong> and <strong>non-44.1 kHz</strong> sample rate <strong>mismatches</strong> cause echo</li>
                     <li>The <strong>"ambient noise reduction"</strong> which can be enabled on the built-in mic on Mac appears to cause a very small amount of echo</li>
@@ -74,7 +122,7 @@
                     High volume can produce sound noise on some audio devices.  The value may not be significant if audio device volume is controlled externally.
                 </p>
 		
-                <pre>
+                <pre class="sh_javascript">
 HTMLAudioElement.volume = 0.9;
 HTMLAudioElement.play();
 </pre>
@@ -82,7 +130,7 @@ HTMLAudioElement.play();
                 <p>
                     The <code>GainNode</code> is a simple element that lets us control the volume of the audio that’s coming into to it.
                 </p>
-                <pre>
+                <pre class="sh_javascript">
 var context = new webkitAudioContext(),
 var sineWave = context.createOscillator();
 
@@ -129,18 +177,18 @@ gainNode.gain.value = 0.9;
             </section>
             
         </article>
+        
+        <a href="https://github.com/muaz-khan/WebRTC-Experiment" class="fork-left"></a>
+        
         <footer>
             <p>
                 <a href="https://www.webrtc-experiment.com/">WebRTC Experiments</a>
-                ©
-                <a href="https://plus.google.com/100325991024054712503" rel="author" target="_blank">Muaz Khan</a>, <span>2013 </span>»
-                <a href="mailto:muazkh@gmail.com" target="_blank">Email</a>»
-                <a href="http://twitter.com/muazkh" target="_blank">@muazkh</a>»
-                <a href="https://github.com/muaz-khan" target="_blank">Github</a>
+                © <a href="https://plus.google.com/+MuazKhan" rel="author" target="_blank">Muaz Khan</a>
+                <a href="mailto:muazkh@gmail.com" target="_blank">muazkh@gmail.com</a>
             </p>
         </footer>
     
         <!-- commits.js is useless for you! -->
-        <script src="https://www.webrtc-experiment.com/commits.js" async> </script>
+        <script src="https://cdn.webrtc-experiment.com/commits.js" async> </script>
     </body>
 </html>

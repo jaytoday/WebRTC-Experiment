@@ -4,10 +4,14 @@ This directory contains demos using `MediaStreamRecorder.js` to record audio/vid
 
 =
 
-#### Demos
+##### [Demos](https://www.webrtc-experiment.com/msr/) using [MediaStreamRecorder.js](https://github.com/streamproc/MediaStreamRecorder) library
 
-1. [Audio Recording using MediaStreamRecorder](https://www.webrtc-experiment.com/MediaStreamRecorder/demos/audio-recorder.html)
-2. [Video/Gif Recording using MediaStreamRecorder](https://www.webrtc-experiment.com/MediaStreamRecorder/demos/video-recorder.html)
+| Experiment Name        | Demo           | Source Code |
+| ------------- |-------------|-------------|
+| **Audio Recording** | [Demo](https://www.webrtc-experiment.com/msr/audio-recorder.html) | [Source](https://github.com/streamproc/MediaStreamRecorder/tree/master/demos/audio-recorder.html) |
+| **Video Recording** | [Demo](https://www.webrtc-experiment.com/msr/video-recorder.html) | [Source](https://github.com/streamproc/MediaStreamRecorder/tree/master/demos/video-recorder.html) |
+| **Gif Recording** | [Demo](https://www.webrtc-experiment.com/msr/gif-recorder.html) | [Source](https://github.com/streamproc/MediaStreamRecorder/tree/master/demos/gif-recorder.html) |
+| **MultiStreamRecorder Demo** | [Demo](https://www.webrtc-experiment.com/msr/MultiStreamRecorder.html) | [Source](https://github.com/streamproc/MediaStreamRecorder/tree/master/demos/MultiStreamRecorder.html) |
 
 =
 

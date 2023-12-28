@@ -1,22 +1,21 @@
-﻿// 2013, Muaz Khan - https://github.com/muaz-khan
-// MIT License     - https://webrtc-experiment.appspot.com/licence/
-// Documentation   - https://github.com/muaz-khan/WebRTC-Experiment/tree/master/chat-hangout
+﻿// Muaz Khan         - www.MuazKhan.com
+// MIT License       - www.WebRTC-Experiment.com/licence
+// Experiments       - github.com/muaz-khan/WebRTC-Experiment
 
 var config = {
     openSocket: function(config) {
-        var SIGNALING_SERVER = 'https://www.webrtc-experiment.com:8553/',
-            defaultChannel = location.hash.substr(1) || 'group-text-chat-hangout';
+        var SIGNALING_SERVER = 'https://socketio-over-nodejs2.herokuapp.com:443/';
 
-        var channel = config.channel || defaultChannel;
+        config.channel = config.channel || location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
         var sender = Math.round(Math.random() * 999999999) + 999999999;
 
         io.connect(SIGNALING_SERVER).emit('new-channel', {
-            channel: channel,
+            channel: config.channel,
             sender: sender
         });
 
-        var socket = io.connect(SIGNALING_SERVER + channel);
-        socket.channel = channel;
+        var socket = io.connect(SIGNALING_SERVER + config.channel);
+        socket.channel = config.channel;
         socket.on('connect', function() {
             if (config.callback) config.callback(socket);
         });
@@ -44,7 +43,7 @@ var config = {
         roomsList.insertBefore(tr, roomsList.firstChild);
 
         tr.onclick = function() {
-            var tr = this;
+            tr = this;
             hangoutUI.joinRoom({
                 roomToken: tr.querySelector('.join').id,
                 joinUser: tr.id,
@@ -71,7 +70,7 @@ var config = {
 function createButtonClickHandler() {
     hangoutUI.createRoom({
         userName: prompt('Enter your name', 'Anonymous'),
-        roomName: ((document.getElementById('conference-name') || { }).value || 'Anonymous') + ' // shared via ' + (!!navigator.webkitGetUserMedia ? 'Google Chrome (Stable/Canary)' : 'Mozilla Firefox (Aurora/Nightly)')
+        roomName: (document.getElementById('conference-name') || { }).value || 'Anonymous'
     });
     hideUnnecessaryStuff();
 }

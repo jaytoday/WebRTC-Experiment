@@ -11,16 +11,19 @@
         if (!socketURL) throw 'Socket-URL is mandatory.';
         if (!socketEvent) socketEvent = 'message';
 
-        var root = this;
-        captureUserMedia(function() {
-            new Signaler(root, socketURL, socketEvent);
-        }, root);
+        new Signaler(this, socketURL, socketEvent);
+		
+		this.addStream = function(stream) {	
+			this.MediaStream = stream;
+		};
     };
 
     function Signaler(root, socketURL, socketEvent) {
         var self = this;
 
         root.startBroadcasting = function() {
+			if(!root.MediaStream) throw 'Offerer must have media stream.';
+			
             (function transmit() {
                 socket.send({
                     userid: root.userid,
@@ -100,7 +103,7 @@
 
                 var mediaElement = document.createElement('video');
                 mediaElement.id = root.participant;
-                mediaElement[isFirefox ? 'mozSrcObject' : 'src'] = isFirefox ? stream : window.webkitURL.createObjectURL(stream);
+                mediaElement.srcObject =  stream;
                 mediaElement.autoplay = true;
                 mediaElement.controls = true;
                 mediaElement.play();
@@ -108,8 +111,7 @@
                 var streamObject = {
                     mediaElement: mediaElement,
                     stream: stream,
-                    userid: root.participant,
-                    type: 'remote'
+                    participantid: root.participant
                 };
 
                 function afterRemoteStreamStartedFlowing() {
@@ -149,9 +151,8 @@
                 root.close();
         };
 
-        var socket = io.connect(socketURL);
-        socket.on(socketEvent, function(message) {
-            if (message.userid == root.userid) return;
+		function onmessage(message) {
+			if (message.userid == root.userid) return;
             root.participant = message.userid;
 
             // for pretty logging
@@ -189,19 +190,22 @@
             if (message.userLeft && message.to == root.userid) {
                 closePeerConnections();
             }
-        });
-
-        socket.send = function(data) {
-            socket.emit(socketEvent, data);
-        };
+		}
+		
+		var socket = socketURL;
+		if(typeof socketURL == 'string') {
+			var socket = io.connect(socketURL);
+			socket.send = function(data) {
+				socket.emit(socketEvent, data);
+			};
+		}
+        
+        socket.on(socketEvent, onmessage);
     }
 
     var RTCPeerConnection = window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
     var RTCSessionDescription = window.mozRTCSessionDescription || window.RTCSessionDescription;
     var RTCIceCandidate = window.mozRTCIceCandidate || window.RTCIceCandidate;
-
-    navigator.getUserMedia = navigator.mozGetUserMedia || navigator.webkitGetUserMedia;
-    window.URL = window.webkitURL || window.URL;
 
     var isFirefox = !!navigator.mozGetUserMedia;
     var isChrome = !!navigator.webkitGetUserMedia;
@@ -210,31 +214,13 @@
         url: isChrome ? 'stun:stun.l.google.com:19302' : 'stun:23.21.150.121'
     };
 
-    var TURN = {
-        url: 'turn:homeo@turn.bistri.com:80',
-        credential: 'homeo'
-    };
-
     var iceServers = {
         iceServers: [STUN]
     };
 
-    if (isChrome) {
-        if (parseInt(navigator.userAgent.match( /Chrom(e|ium)\/([0-9]+)\./ )[2]) >= 28)
-            TURN = {
-                url: 'turn:turn.bistri.com:80',
-                credential: 'homeo',
-                username: 'homeo'
-            };
-
-        iceServers.iceServers = [STUN, TURN];
+    if(typeof IceServersHandler !== 'undefined') {
+        iceServers.iceServers = IceServersHandler.getIceServers();
     }
-
-    var optionalArgument = {
-        optional: [{
-            DtlsSrtpKeyAgreement: true
-        }]
-    };
 
     var offerAnswerConstraints = {
         optional: [],
@@ -247,28 +233,47 @@
     function getToken() {
         return Math.round(Math.random() * 9999999999) + 9999999999;
     }
+	
+	function onSdpError() {}
 
     // var offer = Offer.createOffer(config);
     // offer.setRemoteDescription(sdp);
     // offer.addIceCandidate(candidate);
     var Offer = {
         createOffer: function(config) {
-            var peer = new RTCPeerConnection(iceServers, optionalArgument);
+            var peer = new RTCPeerConnection(iceServers);
 
-            if (config.MediaStream) peer.addStream(config.MediaStream);
-            peer.onaddstream = function(event) {
-                config.onStreamAdded(event.stream);
-            };
+            if(typeof peer.addTrack === 'function') {
+                if (config.MediaStream) {
+                    config.MediaStream.getTracks().forEach(function(track) {
+                        peer.addTrack(track, config.MediaStream);
+                    });
+                }
+                var dontDuplicate = {};
+                peer.ontrack = function(event) {
+                    var stream = event.streams[0];
+                    if(dontDuplicate[stream.id]) return;
+                    dontDuplicate[stream.id] = true;
+                    config.onStreamAdded(stream);
+                };
+            }
+            else {
+                if (config.MediaStream) peer.addStream(config.MediaStream);
+                peer.onaddstream = function(event) {
+                    config.onStreamAdded(event.stream);
+                };
+            }
 
             peer.onicecandidate = function(event) {
                 if (event.candidate)
                     config.onicecandidate(event.candidate);
             };
 
-            peer.createOffer(function(sdp) {
-                peer.setLocalDescription(sdp);
-                config.onsdp(sdp);
-            }, null, offerAnswerConstraints);
+            peer.createOffer(offerAnswerConstraints).then(function(sdp) {
+                peer.setLocalDescription(sdp).then(function() {
+                    config.onsdp(sdp);
+                });
+            }).catch(onSdpError);
 
             this.peer = peer;
 
@@ -290,23 +295,40 @@
     // answer.addIceCandidate(candidate);
     var Answer = {
         createAnswer: function(config) {
-            var peer = new RTCPeerConnection(iceServers, optionalArgument);
+            var peer = new RTCPeerConnection(iceServers);
 
-            if (config.MediaStream) peer.addStream(config.MediaStream);
-            peer.onaddstream = function(event) {
-                config.onStreamAdded(event.stream);
-            };
+            if(typeof peer.addTrack === 'function') {
+                if (config.MediaStream) {
+                    config.MediaStream.getTracks().forEach(function(track) {
+                        peer.addTrack(track, config.MediaStream);
+                    });
+                }
+                var dontDuplicate = {};
+                peer.ontrack = function(event) {
+                    var stream = event.streams[0];
+                    if(dontDuplicate[stream.id]) return;
+                    dontDuplicate[stream.id] = true;
+                    config.onStreamAdded(stream);
+                };
+            }
+            else {
+                if (config.MediaStream) peer.addStream(config.MediaStream);
+                peer.onaddstream = function(event) {
+                    config.onStreamAdded(event.stream);
+                };
+            }
 
             peer.onicecandidate = function(event) {
                 if (event.candidate)
                     config.onicecandidate(event.candidate);
             };
 
-            peer.setRemoteDescription(new RTCSessionDescription(config.sdp));
-            peer.createAnswer(function(sdp) {
-                peer.setLocalDescription(sdp);
-                config.onsdp(sdp);
-            }, null, offerAnswerConstraints);
+            peer.setRemoteDescription(new RTCSessionDescription(config.sdp)).then(function() {
+                peer.createAnswer(offerAnswerConstraints).then(function(sdp) {
+                    peer.setLocalDescription(sdp);
+                    config.onsdp(sdp);
+                }).catch(onSdpError);
+            });
 
             this.peer = peer;
 
@@ -320,45 +342,6 @@
         }
     };
 
-    function captureUserMedia(callback, root) {
-        var constraints = {
-            audio: true,
-            video: true
-        };
-
-        navigator.getUserMedia(constraints, onstream, onerror);
-
-        function onstream(stream) {
-            callback();
-
-            stream.onended = function() {
-                if (root.onStreamEnded) root.onStreamEnded(streamObject);
-            };
-
-            root.MediaStream = stream;
-
-            var mediaElement = document.createElement('video');
-            mediaElement.id = 'self';
-            mediaElement[isFirefox ? 'mozSrcObject' : 'src'] = isFirefox ? stream : window.webkitURL.createObjectURL(stream);
-            mediaElement.autoplay = true;
-            mediaElement.controls = true;
-            mediaElement.muted = true;
-            mediaElement.play();
-
-            var streamObject = {
-                mediaElement: mediaElement,
-                stream: stream,
-                userid: 'self',
-                type: 'local'
-            };
-            root.onStreamAdded(streamObject);
-        }
-
-        function onerror(e) {
-            console.error(e);
-        }
-    }
-
     function merge(mergein, mergeto) {
         for (var t in mergeto) {
             mergein[t] = mergeto[t];
@@ -366,4 +349,19 @@
         return mergein;
     }
 
+	navigator.getUserMedia = function(hints, onsuccess, onfailure) {
+		if(!hints) hints = {audio:true,video:true};
+		if(!onsuccess) throw 'Second argument is mandatory. navigator.getUserMedia(hints,onsuccess,onfailure)';
+		
+		navigator.mediaDevices.getUserMedia(hints).then(_onsuccess).catch(_onfailure);
+		
+		function _onsuccess(stream) {
+			onsuccess(stream);
+		}
+		
+		function _onfailure(e) {
+			if(onfailure) onfailure(e);
+			else throw Error('getUserMedia failed: ' + JSON.stringify(e, null, '\t'));
+		}
+	};
 })();

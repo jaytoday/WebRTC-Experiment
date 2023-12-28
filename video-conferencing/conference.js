@@ -1,6 +1,9 @@
-﻿// Muaz Khan     - https://github.com/muaz-khan
-// MIT License   - https://www.webrtc-experiment.com/licence/
-// Documentation - https://github.com/muaz-khan/WebRTC-Experiment/tree/master/video-conferencing
+﻿// Muaz Khan         - www.MuazKhan.com
+// MIT License       - www.WebRTC-Experiment.com/licence
+// Experiments       - github.com/muaz-khan/WebRTC-Experiment
+
+// This library is known as multi-user connectivity wrapper!
+// It handles connectivity tasks to make sure two or more users can interconnect!
 
 var conference = function(config) {
     var self = {
@@ -11,11 +14,12 @@ var conference = function(config) {
     var sockets = [];
     var defaultSocket = { };
 
-    function openDefaultSocket() {
+    function openDefaultSocket(callback) {
         defaultSocket = config.openSocket({
             onmessage: onDefaultSocketResponse,
             callback: function(socket) {
                 defaultSocket = socket;
+                callback();
             }
         });
     }
@@ -35,8 +39,8 @@ var conference = function(config) {
             });
         }
 
-        // to make sure room is unlisted if owner leaves		
-        if(response.left && config.onRoomClosed) {
+        // to make sure room is unlisted if owner leaves        
+        if (response.left && config.onRoomClosed) {
             config.onRoomClosed(response);
         }
     }
@@ -55,6 +59,10 @@ var conference = function(config) {
         socketConfig.callback = function(_socket) {
             socket = _socket;
             this.onopen();
+
+            if(_config.callback) {
+                _config.callback();
+            }
         };
 
         var socket = config.openSocket(socketConfig),
@@ -78,15 +86,24 @@ var conference = function(config) {
             onRemoteStream: function(stream) {
                 if (!stream) return;
 
-                video[moz ? 'mozSrcObject' : 'src'] = moz ? stream : webkitURL.createObjectURL(stream);
-                video.play();
+                try {
+                    video.setAttributeNode(document.createAttribute('autoplay'));
+                    video.setAttributeNode(document.createAttribute('playsinline'));
+                    video.setAttributeNode(document.createAttribute('controls'));
+                } catch (e) {
+                    video.setAttribute('autoplay', true);
+                    video.setAttribute('playsinline', true);
+                    video.setAttribute('controls', true);
+                }
+
+                video.srcObject = stream;
 
                 _config.stream = stream;
                 onRemoteStreamStartsFlowing();
             },
             onRemoteStreamEnded: function(stream) {
                 if (config.onRemoteStreamEnded)
-                    config.onRemoteStreamEnded(stream);
+                    config.onRemoteStreamEnded(stream, video);
             }
         };
 
@@ -100,25 +117,33 @@ var conference = function(config) {
 
             peer = RTCPeerConnection(peerConfig);
         }
+        
+        function afterRemoteStreamStartedFlowing() {
+            gotstream = true;
+
+            if (config.onRemoteStream)
+                config.onRemoteStream({
+                    video: video,
+                    stream: _config.stream
+                });
+
+            if (isbroadcaster && channels.split('--').length > 3) {
+                /* broadcasting newly connected participant for video-conferencing! */
+                defaultSocket.send({
+                    newParticipant: socket.channel,
+                    userToken: self.userToken
+                });
+            }
+        }
 
         function onRemoteStreamStartsFlowing() {
+            if(navigator.userAgent.match(/Android|iPhone|iPad|iPod|BlackBerry|IEMobile/i)) {
+                // if mobile device
+                return afterRemoteStreamStartedFlowing();
+            }
+            
             if (!(video.readyState <= HTMLMediaElement.HAVE_CURRENT_DATA || video.paused || video.currentTime <= 0)) {
-                gotstream = true;
-
-                if (config.onRemoteStream)
-                    config.onRemoteStream({
-                        video: video,
-                        stream: _config.stream
-                    });
-
-                if (isbroadcaster && channels.split('--').length > 3) {
-                    /* broadcasting newly connected participant for video-conferencing! */
-                    defaultSocket.send({
-                        newParticipant: socket.channel,
-                        userToken: self.userToken
-                    });
-                }
-
+                afterRemoteStreamStartedFlowing();
             } else setTimeout(onRemoteStreamStartsFlowing, 50);
         }
 
@@ -177,26 +202,36 @@ var conference = function(config) {
                 delete sockets[i];
             }
         }
-		
+
         // if owner leaves; try to remove his room from all other users side
-        if(isbroadcaster) {
+        if (isbroadcaster) {
             defaultSocket.send({
                 left: true,
                 userToken: self.userToken,
                 roomToken: self.roomToken
             });
         }
-		
-        if(config.attachStream) config.attachStream.stop();
+
+        if (config.attachStream) {
+            if('stop' in config.attachStream) {
+                config.attachStream.stop();
+            }
+            else {
+                config.attachStream.getTracks().forEach(function(track) {
+                    track.stop();
+                });
+            }
+        }
     }
-
-    window.onbeforeunload = function() {
+    
+    window.addEventListener('beforeunload', function () {
         leave();
-    };
+    }, false);
 
-    window.onkeyup = function(e) {
-        if (e.keyCode == 116) leave();
-    };
+    window.addEventListener('keyup', function (e) {
+        if (e.keyCode == 116)
+            leave();
+    }, false);
 
     function startBroadcasting() {
         defaultSocket && defaultSocket.send({
@@ -231,7 +266,8 @@ var conference = function(config) {
         return s4() + s4() + "-" + s4() + "-" + s4() + "-" + s4() + "-" + s4() + s4() + s4();
     }
 
-    openDefaultSocket();
+    openDefaultSocket(config.onReady || function() {});
+
     return {
         createRoom: function(_config) {
             self.roomName = _config.roomName || 'Anonymous';
@@ -249,15 +285,16 @@ var conference = function(config) {
             self.broadcasterid = _config.joinUser;
 
             openSubSocket({
-                channel: self.userToken
-            });
-
-            defaultSocket.send({
-                participant: true,
-                userToken: self.userToken,
-                joinUser: _config.joinUser
+                channel: self.userToken,
+                callback: function() {
+                    defaultSocket.send({
+                        participant: true,
+                        userToken: self.userToken,
+                        joinUser: _config.joinUser
+                    });
+                }
             });
         },
-		leaveRoom: leave
+        leaveRoom: leave
     };
 };

@@ -1,21 +1,35 @@
-﻿/* MIT License: https://webrtc-experiment.appspot.com/licence/ */
+﻿// Muaz Khan         - www.MuazKhan.com
+// MIT License       - www.WebRTC-Experiment.com/licence
+// Experiments       - github.com/muaz-khan/WebRTC-Experiment
 
 var config = {
-    openSocket: function (config) {
-        var channel = config.channel || location.hash.replace('#', '') || 'audio-broadcast';
-        var socket = new Firebase('https://signaling.firebaseIO.com/' + channel);
-        socket.channel = channel;
-        socket.on('child_added', function (data) {
-            config.onmessage(data.val());
+    openSocket: function(config) {
+        var SIGNALING_SERVER = 'https://socketio-over-nodejs2.herokuapp.com:443/';
+
+        config.channel = config.channel || location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
+        var sender = Math.round(Math.random() * 999999999) + 999999999;
+
+        io.connect(SIGNALING_SERVER).emit('new-channel', {
+            channel: config.channel,
+            sender: sender
         });
-        socket.send = function (data) {
-            this.push(data);
-        }
-        config.onopen && setTimeout(config.onopen, 1);
-        socket.onDisconnect().remove();
-        return socket;
+
+        var socket = io.connect(SIGNALING_SERVER + config.channel);
+        socket.channel = config.channel;
+        socket.on('connect', function() {
+            if (config.callback) config.callback(socket);
+        });
+
+        socket.send = function(message) {
+            socket.emit('message', {
+                sender: sender,
+                data: message
+            });
+        };
+
+        socket.on('message', config.onmessage);
     },
-    onRemoteStream: function (media) {
+    onRemoteStream: function(media) {
         var audio = media.audio;
         audio.setAttribute('controls', true);
         audio.setAttribute('autoplay', true);
@@ -25,7 +39,7 @@ var config = {
         audio.play();
         rotateAudio(audio);
     },
-    onRoomFound: function (room) {
+    onRoomFound: function(room) {
         var alreadyExist = document.getElementById(room.broadcaster);
         if (alreadyExist) return;
 
@@ -37,9 +51,9 @@ var config = {
             '<td><button class="join" id="' + room.roomToken + '">Join Room</button></td>';
         roomsList.insertBefore(tr, roomsList.firstChild);
 
-        tr.onclick = function () {
-            var tr = this;
-            captureUserMedia(function () {
+        tr.onclick = function() {
+            tr = this;
+            captureUserMedia(function() {
                 broadcastUI.joinRoom({
                     roomToken: tr.querySelector('.join').id,
                     joinUser: tr.id
@@ -51,7 +65,7 @@ var config = {
 };
 
 function createButtonClickHandler() {
-    captureUserMedia(function () {
+    captureUserMedia(function() {
         broadcastUI.createRoom({
             roomName: (document.getElementById('conference-name') || { }).value || 'Anonymous'
         });
@@ -63,19 +77,25 @@ function captureUserMedia(callback) {
     var audio = document.createElement('audio');
     audio.setAttribute('autoplay', true);
     audio.setAttribute('controls', true);
+
+    audio.muted = true;
+    audio.volume = 0;
+
     participants.insertBefore(audio, participants.firstChild);
 
     getUserMedia({
         video: audio,
         constraints: { audio: true, video: false },
-        onsuccess: function (stream) {
+        onsuccess: function(stream) {
             config.attachStream = stream;
             callback && callback();
 
-            audio.setAttribute('muted', true);
+            audio.muted = true;
+            audio.volume = 0;
+            
             rotateAudio(audio);
         },
-        onerror: function () {
+        onerror: function() {
             alert('unable to get access to your microphone.');
             callback && callback();
         }
@@ -102,13 +122,14 @@ function hideUnnecessaryStuff() {
 
 function rotateAudio(audio) {
     audio.style[navigator.mozGetUserMedia ? 'transform' : '-webkit-transform'] = 'rotate(0deg)';
-    setTimeout(function () {
+    setTimeout(function() {
         audio.style[navigator.mozGetUserMedia ? 'transform' : '-webkit-transform'] = 'rotate(360deg)';
     }, 1000);
 }
 
-(function () {
+(function() {
     var uniqueToken = document.getElementById('unique-token');
-    if (uniqueToken) if (location.hash.length > 2) uniqueToken.parentNode.parentNode.parentNode.innerHTML = '<h2 style="text-align:center;"><a href="' + location.href + '" target="_blank">Share this link</a></h2>';
-    else uniqueToken.innerHTML = uniqueToken.parentNode.parentNode.href = '#' + (Math.random() * new Date().getTime()).toString(36).toUpperCase().replace(/\./g, '-');
+    if (uniqueToken)
+        if (location.hash.length > 2) uniqueToken.parentNode.parentNode.parentNode.innerHTML = '<h2 style="text-align:center;"><a href="' + location.href + '" target="_blank">Share this link</a></h2>';
+        else uniqueToken.innerHTML = uniqueToken.parentNode.parentNode.href = '#' + (Math.random() * new Date().getTime()).toString(36).toUpperCase().replace( /\./g , '-');
 })();

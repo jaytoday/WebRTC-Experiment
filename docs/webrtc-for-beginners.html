@@ -6,15 +6,14 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>WebRTC for Beginners ® Muaz Khan</title>
+        <title>WebRTC for Beginners | Muaz Khan</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-        <link rel="author" type="text/html" href="https://plus.google.com/100325991024054712503">
+        <link rel="author" type="text/html" href="https://plus.google.com/+MuazKhan">
         <meta name="author" content="Muaz Khan">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" type="text/css" />
-        <link rel="stylesheet" href="https://www.webrtc-experiment.com/style.css">
+        <link rel="stylesheet" href="https://cdn.webrtc-experiment.com/style.css">
         
         <style>
             p { padding: .8em; }
@@ -41,38 +40,52 @@
             document.createElement('article');
             document.createElement('footer');
         </script>
+    
+
+
+        <script type="text/javascript" src="https://cdn.webrtc-experiment.com/syntax/sh_main.min.js"> </script>
+        <script type="text/javascript" src="https://cdn.webrtc-experiment.com/syntax/sh_javascript.min.js"> </script>
+        <script type="text/javascript" src="https://cdn.webrtc-experiment.com/syntax/sh_html.min.js"> </script>
+        <link type="text/css" rel="stylesheet" href="https://cdn.webrtc-experiment.com/syntax/sh_style.css">
+		
     </head>
 
-    <body>
+    <body onload="sh_highlightDocument();">
         <article>
             <header style="text-align: center;">
                 <h1>
-                    WebRTC for Beginners ® 
-                    <a href="https://github.com/muaz-khan" target="_blank">Muaz Khan</a>
+                    WebRTC for Beginners
                 </h1>            
                 <p>
-                    <span>© 2013</span>
-                    <a href="https://github.com/muaz-khan" target="_blank">Muaz Khan</a><span>&lt;</span><a href="http://twitter.com/muazkh" target="_blank">@muazkh</a><span>&gt;</span>
-                    »
-                    <a href="http://twitter.com/WebRTCWeb" target="_blank" title="Twitter profile for WebRTC Experiments">@WebRTC Experiments</a>
-                    »
-                    <a href="https://plus.google.com/106306286430656356034/posts" target="_blank" title="Google+ page for WebRTC Experiments">Google+</a>
-                    »
-                    <a href="https://github.com/muaz-khan/WebRTC-Experiment/issues" target="_blank">What's New?</a>
+                    <a href="https://www.webrtc-experiment.com/">HOME</a>
+                    <span> &copy; </span>
+                    <a href="http://www.MuazKhan.com/" target="_blank">Muaz Khan</a>
+                    
+                    .
+                    <a href="http://twitter.com/WebRTCWeb" target="_blank" title="Twitter profile for WebRTC Experiments">@WebRTCWeb</a>
+                    
+                    .
+                    <a href="https://github.com/muaz-khan?tab=repositories" target="_blank" title="Github Profile">Github</a>
+                    
+                    .
+                    <a href="https://github.com/muaz-khan/WebRTC-Experiment/issues?state=open" target="_blank">Latest issues</a>
+                    
+                    .
+                    <a href="https://github.com/muaz-khan/WebRTC-Experiment/commits/master" target="_blank">What's New?</a>
                 </p>
             </header>
 
             <div class="github-stargazers"></div>
 
-            <section class="plusone-gplus">
-                <div class="g-plusone" data-href="https://www.webrtc-experiment.com/"></div>
-            </section>
+            <blockquote style="background: #f3b7b7;border: 5px solid black;border-radius: 5px;">
+                This tutorial is <span style="border: 1px dotted red; background: yellow; padding: 2px 5px;">out-dated (written in 2013)</span>. Please check this tutorial instead: <a href="https://codelabs.developers.google.com/codelabs/webrtc-web/#0">https://codelabs.developers.google.com/codelabs/webrtc-web/#0</a>
+            </blockquote>
             
             <section class="experiment">
                 <h2 class="header">Suggestions</h2>
                 <ol>
                     <li>
-                        If you're newcomer, newbie or beginner; you're suggested to try <a href="https://github.com/muaz-khan/WebRTC-Experiment/tree/master/RTCMultiConnection" target="_blank">RTCMultiConnection.js</a> or <a href="https://github.com/muaz-khan/WebRTC-Experiment/tree/master/DataChannel" target="_blank">DataChannel.js</a> libraries.
+                        If you're newcomer, newbie or beginner; you're suggested to try <a href="http://www.rtcmulticonnection.org/docs/" target="_blank">RTCMultiConnection.js</a> or <a href="https://github.com/muaz-khan/WebRTC-Experiment/tree/master/DataChannel" target="_blank">DataChannel.js</a> libraries.
                     </li>
                 </ol>
 		
@@ -83,24 +96,28 @@
                 <p>
                     First of all: you need to get access to microphone and camera if you want to build a video streaming app.
                 </p>
-                <pre>
+                <pre class="sh_javascript">
 var <a href="#addStream" title="To allow your friend hear your voice and see you: we will share your microphone and camera.">streamToAttach</a>;
 navigator.<strong id="webkitGetUserMedia" title="This API allows us access to your microphone and camera.">webkitGetUserMedia</strong>({ audio: <strong title="Allowing access to microphone.">true</strong>, video: <strong title="Allowing access to camera.">true</strong> }, function (stream) {
     video.src = webkitURL.<strong>createObjectURL</strong>(stream);
     <a id="streamToAttach" href="#addStream">streamToAttach</a> = stream;
+}, function(error) {
+    alert(error);
 });
 </pre>
             </section>
 			
             <section class="experiment">
                 <h2 class="header">Getting USER MEDIA using Firefox media capture APIs</h2>
-                <pre>
+                <pre class="sh_javascript">
 var <a href="#addStream" title="To allow your friend hear your voice and see you: we will share your microphone and camera.">streamToAttach</a>;
 navigator.<strong id="mozGetUserMedia" title="This API allows us access to your microphone and camera.">mozGetUserMedia</strong>({ audio: <strong title="Allowing access to microphone.">true</strong>, video: <strong title="Allowing access to camera.">true</strong> }, function (stream) {
     video.mozSrcObject = stream;
     video.play();
     <a id="A1" href="#addStream">streamToAttach</a> = stream;
-}, function(error) {throw error;});
+}, function(error) {
+    alert(error);
+});
 </pre>
             </section>
 			
@@ -133,7 +150,7 @@ navigator.<strong id="mozGetUserMedia" title="This API allows us access to your 
                     First of all: we need to open a peer connection:
                 </p>
 					
-                <pre>
+                <pre class="sh_javascript">
 var <span id="peerConnection">peerConnection</span> = new <strong id="Strong1" title="Initializing RTCPeerConnection object. You'll do this both for offerer and answerer.">webkitRTCPeerConnection</strong>(
     { "<strong title="ICE servers for NAT traversing">iceServers</strong>": [{ "url": "<strong title="Using STUN as ICE server for NAT traversing">stun</strong>:stun.l.google.com:19302" }] }
 );
@@ -157,7 +174,7 @@ var <span id="peerConnection">peerConnection</span> = new <strong id="Strong1" t
                     Setting event handlers for <a href="#peerConnection">peer connection</a> object:
                 </p>
 					
-                <pre>
+                <pre class="sh_javascript">
 <a href="#peerConnection">peerConnection</a>.<strong title="On getting locally generated ICE candidates: You'll post these locally generated ICE to other peer; so he can add them and ask peer connection object to recognize suitable ICE candidate and complete the handshake.">onicecandidate</strong> = <a href="#onicecandidate-func" id="onicecandidate">onicecandidate</a>;
 <a href="#peerConnection">peerConnection</a>.<strong title="This event fires on getting first clue of remote stream. You should wait until remote stream starts flowing.">onaddstream</strong> = <a href="#onaddstream-func" id="onaddstream">onaddstream</a>;
 <a href="#peerConnection">peerConnection</a>.<strong id="addStream" title="Attaching your local stream (your microphone and camera)">addStream</strong> (<a href="#streamToAttach">streamToAttach</a>);
@@ -166,6 +183,11 @@ var <span id="peerConnection">peerConnection</span> = new <strong id="Strong1" t
                 <p>
                     In simple words: <a href="#onicecandidate-func">onicecandidate</a> returns locally generated ICE candidates so you can pass them over other peer(s) via XHR or Socket.
                 </p>
+                
+                <li>
+                    "locally-generated" means ice candidates that are trickled or gathered for your peer object; i.e. list of ice candidates that are returned by STUN/TURN servers; these ice candidates contains your public ipv4/ipv6 addresses as well as UDP random addresses; you need to share these ice candidates with target peer so WebRTC ICE Agent can use your ports to setup your connection with target peer!
+                </li>
+                
                 <p>
                     <a href="#onaddstream-func">onaddstream</a> returns remote stream (microphone and camera of your friend!).
                 </p>
@@ -179,13 +201,15 @@ var <span id="peerConnection">peerConnection</span> = new <strong id="Strong1" t
             <section class="experiment">
                 <h2 class="header">Creating Offer SDP</h2>
 				
-                <pre>
+                <pre class="sh_javascript">
 <a href="#peerConnection">peerConnection</a>.<strong id="offerer">createOffer</strong>(function (sessionDescription) {
     <a href="#peerConnection">peerConnection</a>.<strong>setLocalDescription</strong>(sessionDescription);
 
     <span class="comment" id="offer-sdp" title="Offerer generated Offer SDP. So, now you should transfer that SDP on the answerer side. Answer will set his remote description using offer sdp.">// POST-Offer-SDP-For-Other-Peer(sessionDescription.<strong>sdp</strong>, sessionDescription.<strong>type</strong>);</span>
 
-}, null, { '<strong>mandatory</strong>': { '<strong>OfferToReceiveAudio</strong>': true, '<strong>OfferToReceiveVideo</strong>': true } });
+}, function(error) {
+    alert(error);
+}, { '<strong>mandatory</strong>': { '<strong>OfferToReceiveAudio</strong>': true, '<strong>OfferToReceiveVideo</strong>': true } });
 </pre>
             </section>
 			
@@ -198,20 +222,22 @@ var <span id="peerConnection">peerConnection</span> = new <strong id="Strong1" t
 			
             <section class="experiment">
                 <h2 class="header">setRemoteDescription!</h2>
-                <pre>
+                <pre class="sh_javascript">
 <a href="#peerConnection">peerConnection</a>.<strong>setRemoteDescription</strong>(new <strong>RTCSessionDescription</strong>(<a href="#offer-sdp">offerSDP</a>));
 </pre>
             </section>
 			
             <section class="experiment">
                 <h2 class="header">And to createAnswer...</h2>
-                <pre>
+                <pre class="sh_javascript">
 <a href="#peerConnection">peerConnection</a>.<strong id="answerer">createAnswer</strong>(function (sessionDescription) {
     <a href="#peerConnection">peerConnection</a>.<strong>setLocalDescription</strong>(sessionDescription);
     
     <span class="comment" id="answer-sdp" title="Answerer generated the Answer SDP. So, now you should transfer that SDP on the offerer side. Offer will set his remote description using answer sdp and complete the handshake.">// POST-answer-SDP-back-to-Offerer(sessionDescription.<strong>sdp</strong>, sessionDescription.<strong>type</strong>);</span>
 
-}, null, { '<strong>mandatory</strong>': { '<strong>OfferToReceiveAudio</strong>': true, '<strong>OfferToReceiveVideo</strong>': true } });
+}, function(error) {
+    alert(error);
+}, { '<strong>mandatory</strong>': { '<strong>OfferToReceiveAudio</strong>': true, '<strong>OfferToReceiveVideo</strong>': true } });
 </pre>
 
                 <p id="answer-sdp-for-offerer">Offerer received <a href="#answer-sdp">answer sdp</a> from <a href="#answerer">answerer</a></p>
@@ -219,7 +245,7 @@ var <span id="peerConnection">peerConnection</span> = new <strong id="Strong1" t
 			
             <section class="experiment">
                 <h2 class="header">setRemoteDescription!</h2>
-                <pre>
+                <pre class="sh_javascript">
 <a href="#peerConnection">peerConnection</a>.<strong>setRemoteDescription</strong>(new <strong>RTCSessionDescription</strong>(<a href="#answer-sdp">answerSDP</a>));
 </pre>
             </section>
@@ -232,7 +258,7 @@ var <span id="peerConnection">peerConnection</span> = new <strong id="Strong1" t
 			
             <section class="experiment">
                 <h2 class="header">On getting locally generated ICE</h2>
-                <pre>
+                <pre class="sh_javascript">
 function <a href="#onicecandidate" id="onicecandidate-func">onicecandidate</a>(event) {
     if (!<a href="#peerConnection">peerConnection</a> || !event || !event.candidate) return;
     var candidate = event.<strong>candidate</strong>;
@@ -243,7 +269,7 @@ function <a href="#onicecandidate" id="onicecandidate-func">onicecandidate</a>(e
 			
             <section class="experiment">
                 <h2 class="header">On getting ICE sent by other peer</h2>
-                <pre>
+                <pre class="sh_javascript">
 <a href="#peerConnection">peerConnection</a>.<strong id="addIceCandidate">addIceCandidate</strong>(new <strong>RTCIceCandidate</strong>({
     <strong>sdpMLineIndex</strong>: candidate.<strong>sdpMLineIndex</strong>,
     <strong>candidate</strong>: candidate.<strong>candidate</strong>
@@ -253,7 +279,7 @@ function <a href="#onicecandidate" id="onicecandidate-func">onicecandidate</a>(e
 			
             <section class="experiment">
                 <h2 class="header"><a href="#onaddstream">onaddstream</a> event handling</h2>
-                <pre>
+                <pre class="sh_javascript">
 function <a href="#onaddstream" id="onaddstream-func">onaddstream</a>(event) {
     if (!event) return;
     remote_video.src = webkitURL.<strong>createObjectURL</strong>(event.<strong>stream</strong>);
@@ -264,7 +290,7 @@ function <a href="#onaddstream" id="onaddstream-func">onaddstream</a>(event) {
 			
             <section class="experiment">
                 <h2 class="header">Wait until <a href="#onaddstream">remote stream</a> starts flowing</h2>
-                <pre>
+                <pre class="sh_javascript">
 function <a href="#onaddstream" id="A2">onaddstream</a>(event) {
     if (!event) return;
     remote_video.src = webkitURL.<strong>createObjectURL</strong>(event.<strong>stream</strong>);
@@ -276,7 +302,7 @@ function <a href="#onaddstream" id="A2">onaddstream</a>(event) {
             </section>
 			
             <section class="experiment">
-                <pre>
+                <pre class="sh_javascript">
 function <strong id="waitUntilRemoteStreamStartsFlowing">waitUntilRemoteStreamStartsFlowing</strong>()
 {
     if (!(remote_video.<strong>readyState</strong> &lt;= HTMLMediaElement.<strong>HAVE_CURRENT_DATA</strong> 
@@ -288,11 +314,56 @@ function <strong id="waitUntilRemoteStreamStartsFlowing">waitUntilRemoteStreamSt
 }
 </pre>
             </section>
+            
+            <section class="experiment">
+                <h2 class="header" id="single-page-demos">Single Page Demos</h2>
+                <ol>
+                    <li>
+                        <a href="https://www.webrtc-experiment.com/demos/client-side.html">Simplest Example!</a>
+                    </li>
+                    
+                    <li>
+                        <a href="https://www.webrtc-experiment.com/demos/client-side-socket-io.html">Simple Demo using Socket.io</a>
+                    </li>
+                    
+                    <li>
+                        <a href="https://www.webrtc-experiment.com/demos/client-side-websocket.html">Simple Demo using WebSocket</a>
+                    </li>
+                    
+                    <li>
+                        <a href="https://www.webrtc-experiment.com/demos/">A few other single-page demos can be found here</a>
+                    </li>
+                </ol>
+            </section>
+            
+            <section class="experiment">
+                <h2 class="header" id="real-demos">Real Demos</h2>
+                <ol>
+                    <li>
+                        <a href="https://www.webrtc-experiment.com/websocket/">Simple demo using WebSockets</a> / <a href="https://github.com/muaz-khan/WebRTC-Experiment/tree/master/websocket">Source Code</a>
+                    </li>
+                    
+                    <li>
+                        <a href="https://www.webrtc-experiment.com/socket.io/">Simple demo using Socket.io</a> / <a href="https://github.com/muaz-khan/WebRTC-Experiment/tree/master/socket.io">Source Code</a>
+                    </li>
+                </ol>
+            </section>
 			
             <section class="experiment">
-                <pre>
-Are you interested in a "more" simple full-fledged guide? Read <a href="/docs/how-to-use-rtcpeerconnection-js-v1.1.html">this document</a>.
-</pre>
+                <h2 class="header" id="other-tutorials">Other Tutorials</h2>
+                <ol>
+                    <li>
+                        Are you interested in a "more" simple full-fledged guide? Read <a href="https://www.webrtc-experiment.com/docs/how-to-use-rtcpeerconnection-js-v1.1.html">this tutorial</a>.
+                    </li>
+                    
+                    <li>
+                        Are you interested in a "more" detailed guide? Read <a href="https://www.webrtc-experiment.com/docs/webrtc-for-newbies.html">this tutorial</a>.
+                    </li>
+                    
+                    <li>
+                        You can find many tutorials here: <a href="https://www.webrtc-experiment.com/#documentations">https://www.webrtc-experiment.com/#documentations</a>
+                    </li>
+                </ol>
             </section>
         
             <section class="experiment own-widgets latest-commits">
@@ -309,18 +380,18 @@ Are you interested in a "more" simple full-fledged guide? Read <a href="/docs/ho
             </section>
             
         </article>
+        
+        <a href="https://github.com/muaz-khan/WebRTC-Experiment" class="fork-left"></a>
+        
         <footer>
             <p>
                 <a href="https://www.webrtc-experiment.com/">WebRTC Experiments</a>
-                ©
-                <a href="https://plus.google.com/100325991024054712503" rel="author" target="_blank">Muaz Khan</a>, <span>2013 </span>»
-                <a href="mailto:muazkh@gmail.com" target="_blank">Email</a>»
-                <a href="http://twitter.com/muazkh" target="_blank">@muazkh</a>»
-                <a href="https://github.com/muaz-khan" target="_blank">Github</a>
+                © <a href="https://plus.google.com/+MuazKhan" rel="author" target="_blank">Muaz Khan</a>
+                <a href="mailto:muazkh@gmail.com" target="_blank">muazkh@gmail.com</a>
             </p>
         </footer>
     
         <!-- commits.js is useless for you! -->
-        <script src="https://www.webrtc-experiment.com/commits.js" async> </script>
+        <script src="https://cdn.webrtc-experiment.com/commits.js" async> </script>
     </body>
 </html>

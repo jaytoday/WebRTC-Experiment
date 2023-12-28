@@ -1,5 +1,5 @@
-// 2013, @muazkh - github.com/muaz-khan
-// MIT License - https://webrtc-experiment.appspot.com/licence/
+// 2013, @muazkh - https://github.com/muaz-khan
+// MIT License   - https://www.webrtc-experiment.com/licence/
 // Documentation - https://github.com/muaz-khan/WebRTC-Experiment/tree/master/audio-broadcast
 
 (function() {
@@ -35,7 +35,7 @@
 
                 var audio = document.createElement('audio');
                 audio.id = 'self';
-                audio[isFirefox ? 'mozSrcObject' : 'src'] = isFirefox ? stream : window.webkitURL.createObjectURL(stream);
+                audio[isFirefox ? 'mozSrcObject' : 'src'] = isFirefox ? stream : window.URL.createObjectURL(stream);
                 audio.autoplay = true;
                 audio.controls = true;
                 audio.play();
@@ -84,14 +84,14 @@
         // unique session-id
         var channel = root.channel;
 
-        // signaling implementation
-        // if no custom signaling channel is provided; use Firebase
+        // signalling implementation
+        // if no custom signalling channel is provided; use Firebase
         if (!root.openSignalingChannel) {
             if (!window.Firebase) throw 'You must link <https://cdn.firebase.com/v0/firebase.js> file.';
 
             // Firebase is capable to store data in JSON format
             // root.transmitOnce = true;
-            var socket = new window.Firebase('https://' + (root.firebase || 'chat') + '.firebaseIO.com/' + channel);
+            var socket = new window.Firebase('https://' + (root.firebase || 'signaling') + '.firebaseIO.com/' + channel);
             socket.on('child_added', function(snap) {
                 var data = snap.val();
                 if (data.userid != userid) {
@@ -112,7 +112,7 @@
                 socket.push(data);
             };
         } else {
-            // custom signaling implementations
+            // custom signalling implementations
             // e.g. WebSocket, Socket.io, SignalR, WebSycn, XMLHttpRequest, Long-Polling etc.
             var socket = root.openSignalingChannel(function(message) {
                 message = JSON.parse(message);
@@ -141,7 +141,7 @@
         // object to store ICE candidates for answerer
         var candidates = { };
 
-        // it is called when your signaling implementation fires "onmessage"
+        // it is called when your signalling implementation fires "onmessage"
         this.onmessage = function(message) {
             // if new room detected
             if (message.roomid && message.broadcasting && !signaler.sentParticipationRequest)
@@ -229,7 +229,7 @@
 
                 var audio = document.createElement('audio');
                 audio.id = _userid;
-                audio[isFirefox ? 'mozSrcObject' : 'src'] = isFirefox ? stream : window.webkitURL.createObjectURL(stream);
+                audio[isFirefox ? 'mozSrcObject' : 'src'] = isFirefox ? stream : window.URL.createObjectURL(stream);
                 audio.autoplay = true;
                 audio.controls = true;
 
@@ -285,46 +285,47 @@
         unloadHandler(userid, signaler);
     }
 
-    // reusable stuff
-    var RTCPeerConnection = window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
-    var RTCSessionDescription = window.mozRTCSessionDescription || window.RTCSessionDescription;
-    var RTCIceCandidate = window.mozRTCIceCandidate || window.RTCIceCandidate;
+    // IceServersHandler.js
 
-    navigator.getUserMedia = navigator.mozGetUserMedia || navigator.webkitGetUserMedia;
-    window.URL = window.webkitURL || window.URL;
+    var IceServersHandler = (function() {
+        function getIceServers(connection) {
+            // resiprocate: 3344+4433
+            // pions: 7575
+            var iceServers = [{
+                'urls': [
+                    'stun:stun.l.google.com:19302',
+                    'stun:stun1.l.google.com:19302',
+                    'stun:stun2.l.google.com:19302',
+                    'stun:stun.l.google.com:19302?transport=udp',
+                ]
+            }];
+
+            return iceServers;
+        }
+
+        return {
+            getIceServers: getIceServers
+        };
+    })();
+
+    // reusable stuff
+    var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+    var RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription;
+    var RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate;
+
+    navigator.getUserMedia = navigator.getUserMedia || navigator.mozGetUserMedia || navigator.webkitGetUserMedia;
+    window.URL = window.URL || window.webkitURL;
 
     var isFirefox = !!navigator.mozGetUserMedia;
     var isChrome = !!navigator.webkitGetUserMedia;
 
-    var STUN = {
-        url: isChrome ? 'stun:stun.l.google.com:19302' : 'stun:23.21.150.121'
-    };
-
-    var TURN = {
-        url: 'turn:webrtc%40live.com@numb.viagenie.ca',
-        credential: 'muazkh'
-    };
-
     var iceServers = {
-        iceServers: [STUN]
+        iceServers: IceServersHandler.getIceServers()
     };
-
-    if (isChrome) {
-        if (parseInt(navigator.userAgent.match( /Chrom(e|ium)\/([0-9]+)\./ )[2]) >= 28)
-            TURN = {
-                url: 'turn:numb.viagenie.ca',
-                credential: 'muazkh',
-                username: 'webrtc@live.com'
-            };
-
-        // No STUN to make sure it works all the time!
-        iceServers.iceServers = [TURN];
-    }
 
     var optionalArgument = {
         optional: [{
             DtlsSrtpKeyAgreement: true
-        // RtpDataChannels: true
         }]
     };
 
@@ -337,14 +338,19 @@
     };
 
     function getToken() {
-        return Math.round(Math.random() * 60535) + 5000;
+        return (Math.random() * new Date().getTime()).toString(36).replace( /\./g , '');
+    }
+	
+	function onSdpSuccess() {}
+
+    function onSdpError(e) {
+        console.error('sdp error:', e.name, e.message);
     }
 
-    /*
-    var offer = Offer.createOffer(config);
-    offer.setRemoteDescription(sdp);
-    offer.addIceCandidate(candidate);
-    */
+    // var offer = Offer.createOffer(config);
+    // offer.setRemoteDescription(sdp);
+    // offer.addIceCandidate(candidate);
+    
     var Offer = {
         createOffer: function(config) {
             var peer = new RTCPeerConnection(iceServers, optionalArgument);
@@ -362,14 +368,14 @@
             peer.createOffer(function(sdp) {
                 peer.setLocalDescription(sdp);
                 if (config.onsdp) config.onsdp(sdp, config.to);
-            }, null, offerAnswerConstraints);
+            }, onSdpError, offerAnswerConstraints);
 
             this.peer = peer;
 
             return this;
         },
         setRemoteDescription: function(sdp) {
-            this.peer.setRemoteDescription(new RTCSessionDescription(sdp));
+            this.peer.setRemoteDescription(new RTCSessionDescription(sdp), onSdpSuccess, onSdpError);
         },
         addIceCandidate: function(candidate) {
             this.peer.addIceCandidate(new RTCIceCandidate({
@@ -379,11 +385,10 @@
         }
     };
 
-    /*
-    var answer = Answer.createAnswer(config);
-    answer.setRemoteDescription(sdp);
-    answer.addIceCandidate(candidate);
-    */
+    // var answer = Answer.createAnswer(config);
+    // answer.setRemoteDescription(sdp);
+    //answer.addIceCandidate(candidate);
+    
     var Answer = {
         createAnswer: function(config) {
             var peer = new RTCPeerConnection(iceServers, optionalArgument);
@@ -398,11 +403,11 @@
                     if (event.candidate) config.onicecandidate(event.candidate, config.to);
                 };
 
-            peer.setRemoteDescription(new RTCSessionDescription(config.sdp));
+            peer.setRemoteDescription(new RTCSessionDescription(config.sdp), onSdpSuccess, onSdpError);
             peer.createAnswer(function(sdp) {
                 peer.setLocalDescription(sdp);
                 if (config.onsdp) config.onsdp(sdp, config.to);
-            }, null, offerAnswerConstraints);
+            }, onSdpError, offerAnswerConstraints);
 
             this.peer = peer;
 
